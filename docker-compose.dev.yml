@@ -1,0 +1,12 @@
+services:
+  app:
+    build: 
+      context: .
+      dockerfile: .devcontainer/DockerFile
+    tty: true
+    stdin_open: true
+    volumes:
+      - ./legoscanner/:/workspaces/legoscanner:cached # Mounts your code
+      - ./bricktracker/:/workspaces/legoscanner/bricktracker/:rw
+    ports:
+      - "8501:8501"

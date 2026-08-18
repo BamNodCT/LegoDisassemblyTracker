@@ -1,0 +1,7 @@
+altair
+pandas
+streamlit
+ipykernel
+streamlit-webrtc
+aiortc
+av
