@@ -13,6 +13,9 @@ import pandas as pd
 import base64
 from pathlib import Path
 import io
+
+import brickmover as bm
+
 #%%
 #%%
 # Webhook
@@ -27,20 +30,6 @@ brick_url = "https://api.brickognize.com"
 #%%
 #%%
 # Helper functions
-## Get Set Name from selected set
-def get_name_by_display(df, display_id):
-    # 1. Filter and select column
-    matches = df.loc[df['setNameDisplay'] == display_id, 'setName']
-    
-    # 2. Return the value if found, otherwise return None
-    return matches.iloc[0] if not matches.empty else None
-
-def get_col2_by_col1(df, col1, col2, display_id):
-    # 1. Filter and select column
-    matches = df.loc[df[col1] == display_id, col2]
-    
-    # 2. Return the value if found, otherwise return None
-    return matches.iloc[0] if not matches.empty else None
 
 ## Construct Payload
 def payload(task,setName=None,partID=None,tracked=None,log_task=None,description=None):
@@ -123,7 +112,12 @@ if test:
     webhook_url_test = "http://localhost:5678/webhook-test/legoscanner"
     # response = requests.post(webhook_url,json=payload,timeout=60)
     #response = call_n8n(payload("GetDisTrack",setName="8811-1"),webhook_url_test)
-    call_n8n(payload("Log",log_task="test",description="This is a test"),webhook_url_test)
+    # call_n8n(payload("Log",log_task="test",description="This is a test"),webhook_url_test)
+    sets = call_n8n(payload("GetSets"))
+    #%%
+    #%%
+    df = pd.DataFrame(sets.json())
+    dict(zip(df["setNameDisplay"], df["setName"]))
     #%%
     #%%
     
@@ -147,67 +141,17 @@ if test:
 
 
 # Session State Initalization
-if 'lastSelectedSet' not in st.session_state:
-    st.session_state.lastSelectedSet = None
-if 'lastSelectedSetName' not in st.session_state:
-    st.session_state.lastSelectedSetName = None
-if 'testResult' not in st.session_state:
-    st.session_state.testResult = None
-if 'disassemblyTracker' not in st.session_state:
-    st.session_state.disassemblyTracker = None
-if 'setLoaded' not in st.session_state:
-    st.session_state.setLoaded = False
-if 'lastUpdatePart' not in st.session_state:
-    st.session_state.lastUpdatePart = None
-if 'viewLog' not in st.session_state:
-    st.session_state.viewLog = False
-if 'snapshot' not in st.session_state:
-    st.session_state.snapshot = None
-if 'flash' not in st.session_state:
-    st.session_state.flash = False
-if 'my_multiselect' not in st.session_state:
-    st.session_state["my_multiselect"] = []
-if 'brick_result' not in st.session_state:
-    st.session_state.brick_result = None
-if 'sent_brick' not in st.session_state:
-    st.session_state.sent_brick = None
-
-#%%
-# Set Data Loading
-@st.cache_data 
-def load_set_list():
-    set_response = call_n8n(payload("GetSets"))
-    return pd.DataFrame(set_response.json())
-
-try:
-    sets = load_set_list()
-    setsNames = sets["setNameDisplay"].to_list()
-except Exception as e:
-    st.error(f"Server Connection Error: {e}")
-    setsNames = []
-#%%
+bm.initialize_session_state()
 
 # Title of Streamlit Application
 st.title("Lego Scanner")
 
 # Always visible: Grab user input for set
-setSelect = st.menu_button("Select Set", options=setsNames)
+setSelect = st.menu_button("Select Set", options=st.session_state.setsNames)
 
 # If new set selected, load new set
 if setSelect is not None:
-    # Grab setName from selected set
-    name = get_name_by_display(sets, setSelect)
-    # If not the most recent set, reload data
-    if st.session_state.lastSelectedSet != setSelect:
-        # Call n8n
-        check_response = call_n8n(payload("CheckSet",setName=name))
-        track_response = call_n8n(payload("GetDisTrack",setName=name))
-        # Save to session_state
-        st.session_state.testResult = pd.DataFrame(check_response.json())
-        st.session_state.disassemblyTracker = pd.DataFrame(track_response.json())
-        st.session_state.lastSelectedSet = setSelect
-        st.session_state.lastSelectedSetName = name
-        st.session_state.setLoaded = True
+    bm.load_tracker(setSelect)
 
 # If set is loaded
 if st.session_state.setLoaded:
@@ -237,7 +181,7 @@ if st.session_state.setLoaded:
             st.rerun()
 
     # If DisassemblyTracker is not empty
-    if not st.session_state.disassemblyTracker.iloc[0].empty:
+    if not st.session_state.disassemblyTracker["setID"].empty:
 
         # Display Disassembly Tracker
         st.subheader(f'{st.session_state.lastSelectedSet} - Set metrics')
