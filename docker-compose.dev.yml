@@ -1,4 +1,14 @@
 services:
+  bricktracker:
+    image: gitea.baerentsen.space/frederikbaerentsen/bricktracker:latest
+    container_name: bricktracker
+    ports:
+      - "3333:3333"
+    environment:
+      - BK_REBRICKABLE_API_KEY=$BK_REBRICKABLE_API_KEY
+    volumes:
+      - ./bricktracker/:/app/data:rw  # v1.3+ consolidates everything into /app/data
+    restart: unless-stopped
   app:
     build: 
       context: .
