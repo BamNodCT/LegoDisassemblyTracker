@@ -5,6 +5,7 @@ from contextlib import closing
 class DatabaseManager:
     def __init__(self, db_path: str):
         self.db_path = db_path
+        self.initialize_tables()
 
     # Establish Connection
     def _get_connection(self):
@@ -25,7 +26,7 @@ class DatabaseManager:
         with self._get_connection() as conn:
             return pd.read_sql_query(query, conn, params=params)
 
-    def execute(self, query: str, params: dict | tuple | list | None = None):
+    def execute(self, query: str, params: dict | tuple | list | None = ()):
         """Executes a single INSERT, UPDATE, DELETE, CREATE query and commits.
 
         Args:
@@ -57,6 +58,27 @@ class DatabaseManager:
                 cursor.execute(query,params)
                 return cursor.rowcount
 
+    def table_exists(self, tablename: str):
+        """Checks if table exists in database
+
+        Args:
+            tablename (str): Table to check if exists
+
+        Returns:
+            bool: Table exists in DB
+        """
+        params = {"tablename":tablename}
+        query = '''
+                SELECT name 
+                FROM sqlite_master
+                where name = :tablename
+                '''
+        with self._get_connection() as conn:
+            with conn:
+                cursor = conn.cursor()
+                cursor.execute(query,params)
+                return True if len(cursor.fetchall()) == 1 else False
+
     def truncate_table(self, table_name: str):
         """Truncates table using DELETE
 
@@ -66,4 +88,39 @@ class DatabaseManager:
         query = f"DELETE FROM {table_name};"
         return self.execute(query)
 
-    
+    def initialize_tables(self):
+
+        log_table = f'''
+                CREATE TABLE [LegoScanner_Log] ( 
+                [id] INTEGER AUTO_INCREMENT NULL,
+                [date] DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ,
+                [task] VARCHAR(250) NULL,
+                [description] VARCHAR(250) NULL,
+                PRIMARY KEY ([id])
+                );
+
+                '''
+        dt_table = f'''
+                CREATE TABLE [disassembly_tracker] ( 
+                [setID] VARCHAR(250) NOT NULL,
+                [setName] VARCHAR(250) NOT NULL,
+                [partID] VARCHAR(250) NULL,
+                [partIDName] VARCHAR(250) NULL,
+                [part] VARCHAR(15) NULL,
+                [color] INT NULL,
+                [spare] BOOLEAN NULL,
+                [imageID] VARCHAR(250) NULL,
+                [partName] VARCHAR(250) NULL,
+                [setTotal] INT NULL,
+                [tracked] INT NULL
+                );
+                '''
+
+        if not self.table_exists('disassembly_tracker'):
+            self.execute(dt_table)
+            print("Created disassembly_tracker")
+        if not self.table_exists('LegoScanner_Log'):
+            self.execute(log_table)
+            print("Created LegoScanner_Log")
+
+

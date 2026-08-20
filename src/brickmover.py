@@ -115,20 +115,3 @@ def load_tracker(setNameDisplay: str):
     st.session_state.lastSelectedSet = setNameDisplay
     st.session_state.lastSelectedSetNAme = setName
     st.session_state.setLoaded = True
-
-## Get Lego Set Name from Selected Lego Set
-def get_name_by_display(df: pd.DataFrame, selectedSet: str):
-    """Grab the Set ID used by BrickTracker for the given 
-
-    Args:
-        df (pd.DataFrame): Df of
-        display_id (str): _description_
-
-    Returns:
-        str: Set Name that matches to Bricktracker Set Name
-    """
-    # 1. Filter and select column
-    matches = df.loc[df['setNameDisplay'] == selectedSet, 'setName']
-    
-    # 2. Return the value if found, otherwise return None
-    return matches.iloc[0] if not matches.empty else None
