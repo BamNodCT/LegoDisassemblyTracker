@@ -11,7 +11,7 @@ services:
     restart: unless-stopped
   app:
     build: 
-      context: .
+      context: ./legoscanner/
       dockerfile: .devcontainer/DockerFile
     # tty: true
     # stdin_open: true
