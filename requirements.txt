@@ -5,3 +5,6 @@ ipykernel
 streamlit-webrtc
 aiortc
 av
+jupyterlab
+jupyter-lsp
+python-lsp-server

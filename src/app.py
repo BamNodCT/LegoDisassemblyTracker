@@ -1,7 +1,7 @@
 ## To run Streamlit app
 # streamlit run ./src/app.py --server.port=8501
 
-#%%
+################ Imports #######################
 # Imports
 import streamlit as st
 #from streamlit_webrtc import webrtc_streamer, WebRtcMode
@@ -16,8 +16,8 @@ import io
 
 import brickmover as bm
 
-#%%
-#%%
+################ Variables #######################
+
 # Webhook
 webhook_url = "http://localhost:5678/webhook/legoscanner"
 # IP Camera url
@@ -27,8 +27,9 @@ snapshot_url = "http://localhost:4444/video/snapshot"
 imagesLocation = "/workspaces/legoscanner/bricktracker/parts"
 # Brickognize
 brick_url = "https://api.brickognize.com"
-#%%
-#%%
+
+################ Functions #######################
+
 # Helper functions
 
 ## Construct Payload
@@ -103,55 +104,54 @@ def flash(swit = 'toggle'):
 def reset_multiselect():
     st.session_state["my_multiselect"] = []
 
-#%%
-
+################ Test code ################
+    
 test = False
 if test:
-    #%%
     # Test Webhook
     webhook_url_test = "http://localhost:5678/webhook-test/legoscanner"
     # response = requests.post(webhook_url,json=payload,timeout=60)
     #response = call_n8n(payload("GetDisTrack",setName="8811-1"),webhook_url_test)
     # call_n8n(payload("Log",log_task="test",description="This is a test"),webhook_url_test)
     sets = call_n8n(payload("GetSets"))
-    #%%
-    #%%
+
     df = pd.DataFrame(sets.json())
     dict(zip(df["setNameDisplay"], df["setName"]))
-    #%%
-    #%%
     
     df = pd.DataFrame(response.json())
     test = df[df["partIDName"] == "8811-1-47297-0-0 | Large Figure Skeletal, Limb, with 2 Ball Joints (Toa Metru)"]
     test["partID"].iloc[0]
-    #%%
 
-    #%%
     flash()
-    #%%
 
-    #%%
     image_test = fetch_snapshot()
     brick_test = call_brickognize(image_test.content)
-    #%%
 
-    #%%
     brick_test.text
-    #%%
 
+################ Main App ################
 
 # Session State Initalization
 bm.initialize_session_state()
 
+# Load set list
+bm.load_set_list()
+
 # Title of Streamlit Application
 st.title("Lego Scanner")
 
-# Always visible: Grab user input for set
-setSelect = st.menu_button("Select Set", options=st.session_state.setsNames)
+# Check if anysets loaded
+if st.session_state.setsNames:
+    # Always visible: Grab user input for set
+    setSelect = st.menu_button("Select Set", options=st.session_state.setsNames)
 
-# If new set selected, load new set
-if setSelect is not None:
-    bm.load_tracker(setSelect)
+    # If new set selected, load new set
+    if setSelect is not None:
+        bm.load_tracker(setSelect)
+
+else:
+    st.write("Load in set to bricktracker first to start tracking!")
+
 
 # If set is loaded
 if st.session_state.setLoaded:

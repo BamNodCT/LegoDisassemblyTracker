@@ -9,14 +9,33 @@ services:
     volumes:
       - ./bricktracker/:/app/data:rw  # v1.3+ consolidates everything into /app/data
     restart: unless-stopped
-  app:
+               
+  legoscanner:
     build: 
       context: ./legoscanner/
-      dockerfile: .devcontainer/DockerFile
-    # tty: true
-    # stdin_open: true
+      dockerfile: DockerFile
+    container_name: legoscanner
     volumes:
       - ./legoscanner/:/workspaces/legoscanner/:rw # Mounts your code
       - ./bricktracker/:/workspaces/legoscanner/bricktracker/:rw
+      - ./ssh/:/root/.ssh:ro
+     # - ./vscode_settings/:/root/.local/share/code-server/User:rw
+    # environment:
+    #   - CAMERA_API=$CAMERA_API
+    #   - BRICKTRACKER_DB=$BRICKTRACKER_DB
+    #   - IMAGE_FOLDER=$IMAGE_FOLDER
     ports:
       - "8501:8501"
+      - "8888:8888"
+
+  dbgate_legoscanner:
+    image: dbgate/dbgate:latest
+    container_name: dbgate_legoscanner
+    restart: unless-stopped
+    ports:
+      - "3004:3000"
+    volumes:
+      # Mount your database folder so DbGate can read it
+      - ./bricktracker/:/root/datadir/sqlite_files
+    environment:
+      - DEV_MODE=false
