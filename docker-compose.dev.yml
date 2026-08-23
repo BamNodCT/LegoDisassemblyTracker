@@ -18,7 +18,7 @@ services:
     volumes:
       - ./legoscanner/:/workspaces/legoscanner/:rw # Mounts your code
       - ./bricktracker/:/workspaces/legoscanner/bricktracker/:rw
-      - ./ssh/:/root/.ssh:ro
+      - ./ssh/:/root/.ssh:rw
      # - ./vscode_settings/:/root/.local/share/code-server/User:rw
     # environment:
     #   - CAMERA_API=$CAMERA_API
