@@ -1,4 +1,12 @@
 services:
+  # # Temporary setup container to build the folder structure
+  # init-folders:
+  #   image: alpine
+  #   container_name: bricktracker-init
+  #   volumes:
+  #     - ./bricktracker/:/app/data:rw
+  #   command: sh -c "mkdir -p /app/data/sets /app/data/parts /app/data/minifigs /app/data/instructions"
+         
   bricktracker:
     image: gitea.baerentsen.space/frederikbaerentsen/bricktracker:latest
     container_name: bricktracker
@@ -6,6 +14,9 @@ services:
       - "3333:3333"
     environment:
       - BK_REBRICKABLE_API_KEY=$BK_REBRICKABLE_API_KEY
+    # depends_on:
+    #   init-folders:
+    #     condition: service_completed_successfully
     volumes:
       - ./bricktracker/:/app/data:rw  # v1.3+ consolidates everything into /app/data
     restart: unless-stopped
@@ -24,6 +35,9 @@ services:
     #   - CAMERA_API=$CAMERA_API
     #   - BRICKTRACKER_DB=$BRICKTRACKER_DB
     #   - IMAGE_FOLDER=$IMAGE_FOLDER
+    # depends_on:
+    #   init-folders:
+    #     condition: service_completed_successfully
     ports:
       - "8501:8501"
       - "8888:8888"
