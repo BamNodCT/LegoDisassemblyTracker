@@ -18,7 +18,7 @@ services:
     #   init-folders:
     #     condition: service_completed_successfully
     volumes:
-      - ./bricktracker/:/app/data:rw  # v1.3+ consolidates everything into /app/data
+      - $BRICKTRACKER_FOLDER:/app/data:rw  # v1.3+ consolidates everything into /app/data
     restart: unless-stopped
                
   legoscanner:
@@ -27,13 +27,12 @@ services:
       dockerfile: DockerFile
     container_name: legoscanner
     volumes:
-      - ./legoscanner/:/workspaces/legoscanner/:rw # Mounts your code
-      - ./bricktracker/:/workspaces/legoscanner/bricktracker/:rw
-      - ./ssh/:/root/.ssh:rw
+      - $LEGOSCANNER_FOLDER:/workspaces/legoscanner/:rw # Mounts your code
+      - $BRICKTRACKER_FOLDER:/workspaces/legoscanner/bricktracker/:rw
+      # DEVELOPMENT
+      - $DEV_SSH_FOLDER:/root/.ssh:rw
     environment:
       - CAMERA_API=$CAMERA_API
-      - BRICKTRACKER_DB=$BRICKTRACKER_DB
-      - IMAGE_FOLDER=$IMAGE_FOLDER
     # depends_on:
     #   init-folders:
     #     condition: service_completed_successfully
@@ -41,6 +40,7 @@ services:
       - "8501:8501"
       - "8888:8888"
 
+  # DEVELOPMENT
   dbgate_legoscanner:
     image: dbgate/dbgate:latest
     container_name: dbgate_legoscanner
@@ -49,6 +49,6 @@ services:
       - "3004:3000"
     volumes:
       # Mount your database folder so DbGate can read it
-      - ./bricktracker/:/root/datadir/sqlite_files
+      - $BRICKTRACKER_FOLDER:/root/datadir/sqlite_files
     environment:
       - DEV_MODE=false
