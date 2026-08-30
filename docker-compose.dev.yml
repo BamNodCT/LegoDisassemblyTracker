@@ -4,7 +4,7 @@ services:
   #   image: alpine
   #   container_name: bricktracker-init
   #   volumes:
-  #     - ./bricktracker/:/app/data:rw
+  #     - $BRICKTRACKER_FOLDER:/app/data:rw
   #   command: sh -c "mkdir -p /app/data/sets /app/data/parts /app/data/minifigs /app/data/instructions"
          
   bricktracker:
