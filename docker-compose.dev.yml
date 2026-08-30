@@ -30,11 +30,10 @@ services:
       - ./legoscanner/:/workspaces/legoscanner/:rw # Mounts your code
       - ./bricktracker/:/workspaces/legoscanner/bricktracker/:rw
       - ./ssh/:/root/.ssh:rw
-     # - ./vscode_settings/:/root/.local/share/code-server/User:rw
-    # environment:
-    #   - CAMERA_API=$CAMERA_API
-    #   - BRICKTRACKER_DB=$BRICKTRACKER_DB
-    #   - IMAGE_FOLDER=$IMAGE_FOLDER
+    environment:
+      - CAMERA_API=$CAMERA_API
+      - BRICKTRACKER_DB=$BRICKTRACKER_DB
+      - IMAGE_FOLDER=$IMAGE_FOLDER
     # depends_on:
     #   init-folders:
     #     condition: service_completed_successfully
