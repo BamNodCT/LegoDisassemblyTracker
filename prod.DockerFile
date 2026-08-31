@@ -9,8 +9,8 @@ RUN apt-get update && apt-get install -y \
 WORKDIR /workspaces/legoscanner
 
 # Copy requirements
-COPY requirements.txt .
-RUN pip3 install --no-cache-dir -r requirements.txt
+COPY requirements.prod.txt .
+RUN pip3 install --no-cache-dir -r requirements.prod.txt
 
 EXPOSE 8501
 

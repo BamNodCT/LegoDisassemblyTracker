@@ -24,7 +24,7 @@ services:
   legoscanner:
     build: 
       context: ./legoscanner/
-      dockerfile: base.DockerFile
+      dockerfile: prod.DockerFile
     container_name: legoscanner
     volumes:
       - $LEGOSCANNER_FOLDER:/workspaces/legoscanner/:rw # Mounts your code
