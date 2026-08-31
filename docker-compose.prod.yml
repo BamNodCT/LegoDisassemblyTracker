@@ -24,13 +24,11 @@ services:
   legoscanner:
     build: 
       context: ./legoscanner/
-      dockerfile: dev.DockerFile
+      dockerfile: base.DockerFile
     container_name: legoscanner
     volumes:
       - $LEGOSCANNER_FOLDER:/workspaces/legoscanner/:rw # Mounts your code
       - $BRICKTRACKER_FOLDER:/workspaces/legoscanner/bricktracker/:rw
-      # DEVELOPMENT
-      - $DEV_SSH_FOLDER:/root/.ssh:rw
     environment:
       - CAMERA_API=$CAMERA_API
     # depends_on:
@@ -38,16 +36,3 @@ services:
     #     condition: service_completed_successfully
     ports:
       - "8501:8501"
-      - "8888:8888"
-
-  dbgate_legoscanner:
-    image: dbgate/dbgate:latest
-    container_name: dbgate_legoscanner
-    restart: unless-stopped
-    ports:
-      - "3004:3000"
-    volumes:
-      # Mount your database folder so DbGate can read it
-      - $BRICKTRACKER_FOLDER:/root/datadir/sqlite_files
-    environment:
-      - DEV_MODE=false
