@@ -12,6 +12,9 @@ WORKDIR /workspaces/legoscanner
 COPY requirements.prod.txt .
 RUN pip3 install --no-cache-dir -r requirements.prod.txt
 
+# Copy app to image
+COPY . .
+
 EXPOSE 8501
 
 CMD ["streamlit", "run", "/workspaces/legoscanner/src/app.py", "--server.port=8501", "--server.address=0.0.0.0"]
