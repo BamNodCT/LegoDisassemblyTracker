@@ -27,7 +27,6 @@ services:
       dockerfile: prod.DockerFile
     container_name: legoscanner
     volumes:
-      - $LEGOSCANNER_FOLDER:/workspaces/legoscanner/:rw # Mounts your code
       - $BRICKTRACKER_FOLDER:/workspaces/legoscanner/bricktracker/:rw
     environment:
       - CAMERA_API=$CAMERA_API
