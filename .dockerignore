@@ -1,0 +1,12 @@
+# Ignore all development files
+*.dev.yml
+*.dev.txt
+dev.DockerFile
+prod.DockerFile
+**/.ipynb_checkpoints/
+**/__pycache__/
+bricktracker/
+.env
+.git
+README.md
+.github/

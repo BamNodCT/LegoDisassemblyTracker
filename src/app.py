@@ -4,10 +4,7 @@
 ################ Imports #######################
 # Imports
 import streamlit as st
-import requests
-import json
 import pandas as pd
-import io
 import brickmover as bm
 import databasemanager
 import settings
@@ -24,64 +21,6 @@ st.set_page_config(layout="wide")
 # Create function to reset multiselect on updating part
 def reset_multiselect():
     st.session_state["my_multiselect"] = []
-
-################ Test code ################
-
-# To-Do
-## Set up way to track parts that don't belong to set
-    
-test = False
-if test:
-
-    db_test = databasemanager.DatabaseManager(settings.BRICKTRACKER_DB)
-
-    importlib.reload(bm)
-    
-    pred_part = bm.Bricklink_to_Bricktracker("32475","72")
-    pred_part
-    
-    params = {"partNum":"32475", "color":"72"}
-    query = f"""
-            select distinct setName
-            from disassembly_tracker
-            where part = :partNum
-                and color = :color
-            """
-
-    partInfo = db_test.query_df(query,params)
-    print(sorted(partInfo["setName"].to_list()))
-    
-    print(partInfo.empty)
-    partInfo.iloc[0].to_dict()
-
-    dt_query = f'''
-                select *
-                from disassembly_tracker
-                where [setName] = '8811-1'
-                '''
-    dt = db_test.query_df(dt_query)
-
-    int(dt["tracked"].sum())
-
-    dt[dt["partID"] == '8811-1-41668-0-1']
-
-    params = {"part":50858, "color":63, "setName":"8811-1"}
-    query = f"""
-                select distinct r.[part] 
-                    , r.[color_id]
-                    , dt.PartID
-                from rebrickable_parts as r
-                left join disassembly_tracker as dt
-                    on r.[part] = dt.[part]
-                    and r.[color_id] = dt.[color]
-                    and dt.setName = :setName
-                where r.[bricklink_part_num] = :part
-                    and r.[bricklink_color_id] = :color
-            """
-    results_test = db_test.query_df(query,params)
-    results_test
-
-    bm.grab_sets("32475","72")
 
 ################ Main App ################
 

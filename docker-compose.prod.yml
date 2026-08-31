@@ -7,11 +7,11 @@ services:
   #     - $BRICKTRACKER_FOLDER:/app/data:rw
   #   command: sh -c "mkdir -p /app/data/sets /app/data/parts /app/data/minifigs /app/data/instructions"
          
-  bricktracker_dev:
+  bricktracker:
     image: gitea.baerentsen.space/frederikbaerentsen/bricktracker:latest
-    container_name: bricktracker_dev
+    container_name: bricktracker
     ports:
-      - "3334:3333"
+      - "3333:3333"
     environment:
       - BK_REBRICKABLE_API_KEY=$BK_REBRICKABLE_API_KEY
     # depends_on:
@@ -21,33 +21,15 @@ services:
       - $BRICKTRACKER_FOLDER:/app/data:rw  # v1.3+ consolidates everything into /app/data
     restart: unless-stopped
                
-  legoscanner_dev:
-    build: 
-      context: ./legoscanner/
-      dockerfile: dev.DockerFile
-    container_name: legoscanner_dev
+  legoscanner:
+    image: ghcr.io/bamnodct/legodisassemblytracker:latest
+    container_name: legoscanner
     volumes:
-      - $LEGOSCANNER_FOLDER:/workspaces/legoscanner/:rw # Mounts your code
       - $BRICKTRACKER_FOLDER:/workspaces/legoscanner/bricktracker/:rw
-      # DEVELOPMENT
-      - $DEV_SSH_FOLDER:/root/.ssh:rw
     environment:
       - CAMERA_API=$CAMERA_API
     # depends_on:
     #   init-folders:
     #     condition: service_completed_successfully
     ports:
-      - "8502:8501"
-      - "8888:8888"
-
-  dbgate_legoscanner:
-    image: dbgate/dbgate:latest
-    container_name: dbgate_legoscanner
-    restart: unless-stopped
-    ports:
-      - "3004:3000"
-    volumes:
-      # Mount your database folder so DbGate can read it
-      - $BRICKTRACKER_FOLDER:/root/datadir/sqlite_files
-    environment:
-      - DEV_MODE=false
+      - "8501:8501"

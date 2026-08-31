@@ -1,10 +1,7 @@
 altair
 pandas
 streamlit
-ipykernel
 streamlit-webrtc
 aiortc
 av
-jupyterlab
-jupyter-lsp
-python-lsp-server
+requests

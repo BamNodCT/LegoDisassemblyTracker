@@ -16,13 +16,10 @@ RUN echo 'export PS1="\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[0
 WORKDIR /workspaces/legoscanner
 
 # Copy requirements
-COPY requirements.txt .
-RUN pip3 install --no-cache-dir -r requirements.txt
+COPY requirements.dev.txt .
+RUN pip3 install --no-cache-dir -r requirements.dev.txt
 
 EXPOSE 8501 8888
-#HEALTHCHECK CMD curl --fail http://localhost:8501/_stcore/health
 
-#ENTRYPOINT ["streamlit", "run", "/workspaces/legoscanner/src/app.py", "--server.port=8501", "--server.address=0.0.0.0"]
-#CMD ["code-server", "--bind-addr", "0.0.0.0:8080", "--auth", "none", "/workspaces/legoscanner"]
 # Launch JupyterLab, bind to all network interfaces, and allow running as root in container
 ENTRYPOINT ["jupyter", "lab", "--ip=0.0.0.0", "--port=8888", "--no-browser", "--allow-root", "--ContentsManager.allow_hidden=True"]
