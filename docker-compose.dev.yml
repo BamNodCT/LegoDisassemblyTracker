@@ -1,11 +1,12 @@
 services:
-  # # Temporary setup container to build the folder structure
-  # init-folders:
-  #   image: alpine
-  #   container_name: bricktracker-init
-  #   volumes:
-  #     - $BRICKTRACKER_FOLDER:/app/data:rw
-  #   command: sh -c "mkdir -p /app/data/sets /app/data/parts /app/data/minifigs /app/data/instructions"
+  # Temporary setup container to build the folder structure
+  init-folders:
+    image: alpine:latest
+    container_name: bricktracker-init
+    volumes:
+      - ${BRICKTRACKER_FOLDER}:/app/data
+    command: sh -c "mkdir -p /app/data/sets /app/data/parts /app/data/minifigs /app/data/instructions && chown -R ${PUID}:${PGID} /app/data"
+    restart: "no"
          
   bricktracker_dev:
     image: gitea.baerentsen.space/frederikbaerentsen/bricktracker:latest
@@ -13,29 +14,29 @@ services:
     ports:
       - "3334:3333"
     environment:
-      - BK_REBRICKABLE_API_KEY=$BK_REBRICKABLE_API_KEY
-    # depends_on:
-    #   init-folders:
-    #     condition: service_completed_successfully
+      - BK_REBRICKABLE_API_KEY=${BK_REBRICKABLE_API_KEY}
+    depends_on:
+      init-folders:
+        condition: service_completed_successfully
     volumes:
-      - $BRICKTRACKER_FOLDER:/app/data:rw  # v1.3+ consolidates everything into /app/data
+      - ${BRICKTRACKER_FOLDER}:/app/data:rw  # v1.3+ consolidates everything into /app/data
     restart: unless-stopped
                
   legoscanner_dev:
     build: 
-      context: ./legoscanner/
+      context: ${LEGOSCANNER_FOLDER}
       dockerfile: dev.DockerFile
     container_name: legoscanner_dev
     volumes:
-      - $LEGOSCANNER_FOLDER:/workspaces/legoscanner/:rw # Mounts your code
-      - $BRICKTRACKER_FOLDER:/workspaces/legoscanner/bricktracker/:rw
+      - ${LEGOSCANNER_FOLDER}:/workspaces/legoscanner/:rw # Mounts your code
+      - ${BRICKTRACKER_FOLDER}:/workspaces/legoscanner/bricktracker/:rw
       # DEVELOPMENT
-      - $DEV_SSH_FOLDER:/root/.ssh:rw
+      - ${DEV_SSH_FOLDER}:/root/.ssh:rw
     environment:
-      - CAMERA_API=$CAMERA_API
-    # depends_on:
-    #   init-folders:
-    #     condition: service_completed_successfully
+      - CAMERA_API=${CAMERA_API}
+    depends_on:
+      init-folders:
+        condition: service_completed_successfully
     ports:
       - "8502:8501"
       - "8888:8888"
@@ -48,6 +49,6 @@ services:
       - "3004:3000"
     volumes:
       # Mount your database folder so DbGate can read it
-      - $BRICKTRACKER_FOLDER:/root/datadir/sqlite_files
+      - ${BRICKTRACKER_FOLDER}/app.db:/root/datadir/sqlite_files/app.db:rw
     environment:
       - DEV_MODE=false
