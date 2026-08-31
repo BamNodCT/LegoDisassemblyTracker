@@ -22,9 +22,7 @@ services:
     restart: unless-stopped
                
   legoscanner:
-    build: 
-      context: ./legoscanner/
-      dockerfile: prod.DockerFile
+    image: ghcr.io/bamnodct/legodisassemblytracker:latest
     container_name: legoscanner
     volumes:
       - $BRICKTRACKER_FOLDER:/workspaces/legoscanner/bricktracker/:rw

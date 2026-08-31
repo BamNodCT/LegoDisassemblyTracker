@@ -7,11 +7,11 @@ services:
   #     - $BRICKTRACKER_FOLDER:/app/data:rw
   #   command: sh -c "mkdir -p /app/data/sets /app/data/parts /app/data/minifigs /app/data/instructions"
          
-  bricktracker:
+  bricktracker_dev:
     image: gitea.baerentsen.space/frederikbaerentsen/bricktracker:latest
-    container_name: bricktracker
+    container_name: bricktracker_dev
     ports:
-      - "3333:3333"
+      - "3334:3333"
     environment:
       - BK_REBRICKABLE_API_KEY=$BK_REBRICKABLE_API_KEY
     # depends_on:
@@ -21,11 +21,11 @@ services:
       - $BRICKTRACKER_FOLDER:/app/data:rw  # v1.3+ consolidates everything into /app/data
     restart: unless-stopped
                
-  legoscanner:
+  legoscanner_dev:
     build: 
       context: ./legoscanner/
       dockerfile: dev.DockerFile
-    container_name: legoscanner
+    container_name: legoscanner_dev
     volumes:
       - $LEGOSCANNER_FOLDER:/workspaces/legoscanner/:rw # Mounts your code
       - $BRICKTRACKER_FOLDER:/workspaces/legoscanner/bricktracker/:rw
@@ -37,7 +37,7 @@ services:
     #   init-folders:
     #     condition: service_completed_successfully
     ports:
-      - "8501:8501"
+      - "8502:8501"
       - "8888:8888"
 
   dbgate_legoscanner:
