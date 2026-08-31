@@ -49,6 +49,6 @@ services:
       - "3004:3000"
     volumes:
       # Mount your database folder so DbGate can read it
-      - ${BRICKTRACKER_FOLDER}/app.db:/root/datadir/sqlite_files
+      - ${BRICKTRACKER_FOLDER}/app.db:/root/datadir/sqlite_files/app.db:rw
     environment:
       - DEV_MODE=false
