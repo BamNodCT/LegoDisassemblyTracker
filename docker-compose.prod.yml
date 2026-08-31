@@ -1,11 +1,11 @@
 services:
-  # # Temporary setup container to build the folder structure
+  # Temporary setup container to build the folder structure
   init-folders:
     image: alpine:latest
     container_name: bricktracker-init
     volumes:
-      - $BRICKTRACKER_FOLDER:/app/data
-    command: sh -c "mkdir -p /app/data/sets /app/data/parts /app/data/minifigs /app/data/instructions && chown -R $PUID:$PGID /app/data"
+      - ${BRICKTRACKER_FOLDER}:/app/data
+    command: sh -c "mkdir -p /app/data/sets /app/data/parts /app/data/minifigs /app/data/instructions && chown -R ${PUID}:${PGID} /app/data"
     restart: "no"
          
   bricktracker:
@@ -14,9 +14,9 @@ services:
     ports:
       - "3333:3333"
     environment:
-      - BK_REBRICKABLE_API_KEY=$BK_REBRICKABLE_API_KEY
+      - BK_REBRICKABLE_API_KEY=${BK_REBRICKABLE_API_KEY}
     volumes:
-      - $BRICKTRACKER_FOLDER:/app/data:rw  # v1.3+ consolidates everything into /app/data
+      - ${BRICKTRACKER_FOLDER}:/app/data:rw  # v1.3+ consolidates everything into /app/data
     depends_on:
       init-folders:
         condition: service_completed_successfully
@@ -26,9 +26,9 @@ services:
     image: ghcr.io/bamnodct/legodisassemblytracker:main
     container_name: legoscanner
     volumes:
-      - $BRICKTRACKER_FOLDER:/workspaces/legoscanner/bricktracker/:rw
+      - ${BRICKTRACKER_FOLDER}:/workspaces/legoscanner/bricktracker/:rw
     environment:
-      - CAMERA_API=$CAMERA_API
+      - CAMERA_API=${CAMERA_API}
     depends_on:
       init-folders:
         condition: service_completed_successfully

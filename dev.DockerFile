@@ -16,7 +16,7 @@ RUN echo 'export PS1="\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[0
 WORKDIR /workspaces/legoscanner
 
 # Copy requirements
-COPY requirements.dev.txt .
+COPY requirements*.txt .
 RUN pip3 install --no-cache-dir -r requirements.dev.txt
 
 EXPOSE 8501 8888

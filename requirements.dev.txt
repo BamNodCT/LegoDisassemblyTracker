@@ -1,4 +1,4 @@
--r requirements.txt
+-r requirements.prod.txt
 ipykernel
 jupyterlab
 jupyter-lsp
