@@ -12,6 +12,7 @@ import io
 import base64
 from pathlib import Path
 import pandas as pd
+import time
 
 # Define Variables 
 ## IP Camera
@@ -52,10 +53,10 @@ defaults = {
     'pred_color': None,
     # Saved Settings
     'setLoaded': False,
+    'callBrickcognize': False,
     'my_multiselect': [],
     'viewLog': False,
     'flash': False,
-    'predAddMulti': False,
     'setNotAvailable' : False,
 }
 ## Prediction Options
@@ -198,6 +199,8 @@ def load_predicted_part():
         part (str): PartID from bricklink
         color (str): Color id from bricklink
     """
+    exactMatch = False
+    
     bounding_box = st.session_state.brick_result["bounding_box"]
     part = st.session_state.brick_result["items"][0]
     color = st.session_state.brick_result["colors"][0]
@@ -213,10 +216,24 @@ def load_predicted_part():
 
     # Load Bricktracker PartID and Color
     params = {"part":part["id"], "color":color["id"], "setName":st.session_state.lastSelectedSetName}
+    # query = f"""
+    #             select distinct r.[part] 
+    #                 , r.[color_id]
+    #                 , dt.PartID
+    #             from rebrickable_parts as r
+    #             left join disassembly_tracker as dt
+    #                 on r.[part] = dt.[part]
+    #                 and r.[color_id] = dt.[color]
+    #                 and dt.setName = :setName
+    #             where r.[bricklink_part_num] = :part
+    #                 and r.[bricklink_color_id] = :color
+    #         """
     query = f"""
                 select distinct r.[part] 
                     , r.[color_id]
-                    , dt.PartID
+                    , dt.partID
+                    , iif(dt.partID is null,1,0) as NoMatch
+                    , 1 as ExactMatch
                 from rebrickable_parts as r
                 left join disassembly_tracker as dt
                     on r.[part] = dt.[part]
@@ -224,6 +241,19 @@ def load_predicted_part():
                     and dt.setName = :setName
                 where r.[bricklink_part_num] = :part
                     and r.[bricklink_color_id] = :color
+                union
+                select distinct r.[part] 
+                    , r.[color_id]
+                    , dt.partID
+                    , iif(dt.partID is null,1,0) as NoMatch
+                    , 0 as ExactMatch
+                from rebrickable_parts as r
+                left join disassembly_tracker as dt
+                    on r.[part] = dt.[part]
+                    and r.[color_id] = dt.[color]
+                    and dt.setName = :setName
+                where r.[bricklink_part_num] = :part
+                order by ExactMatch Desc, NoMatch, PartID
             """
 
     try:
@@ -234,14 +264,31 @@ def load_predicted_part():
             st.session_state.pred_part = None
             st.session_state.pred_color = None
             return
-        partInfo = partsInfo.iloc[0].to_dict()
-        st.session_state.pred_part = partInfo["part"]
-        st.session_state.pred_color = partInfo["color_id"]
-        partIDs = partsInfo["partID"].to_list()
-        if partIDs[0] is None:
-            st.error(f"Part in database but not for {st.session_state.lastSelectedSet}")
+        # Matching part
+        if not partsInfo.query('NoMatch == 0 and ExactMatch == 1').empty:
+            exactMatch = True
+            st.info("Exact Match")
+            partInfo = partsInfo.query('NoMatch == 0 and ExactMatch == 1').sort_values(by='partID').iloc[0].to_dict()
+            st.session_state.pred_part = partInfo["part"]
+            st.session_state.pred_color = partInfo["color_id"]
+            partIDs = partsInfo.query('NoMatch == 0 and ExactMatch == 1').sort_values(by=["partID"])["partID"].to_list()
+        # Matches on Part but not Color
+        elif not partsInfo.query('NoMatch == 0 and ExactMatch == 0').empty:
+            st.info("No Exact Match: Other Colors Available")
+            st.dataframe( partsInfo.query('NoMatch == 0 and ExactMatch == 0').sort_values(by=["partID"])[["partID","part","color_id"]])
+        # Part in other sets
+        if not partsInfo.query('NoMatch == 1 and ExactMatch == 1').empty and not exactMatch:
+            st.info(f"Exact Part in database but not for {st.session_state.lastSelectedSet}")
+            partInfo = partsInfo.query('NoMatch == 1 and ExactMatch == 1').sort_values(by='partID').iloc[0].to_dict()
+            st.session_state.pred_part = partInfo["part"]
+            st.session_state.pred_color = partInfo["color_id"]
+            partIDs = partsInfo["partID"].to_list()
             display_other_sets(st.session_state.pred_part, st.session_state.pred_color)
             st.session_state.setNotAvailable = True
+            return
+        # Catch all
+        if not exactMatch:
+            st.info("Exact Part not in database")
             return
     except Exception as e:
         st.error(f"{e}")
@@ -341,6 +388,7 @@ def update_disassemblyTracker(updateNumber: int = None, increment: bool = False)
         logTask = "UpdatePart"
         logDescription = f"Did not update Part {part["part"]} with Color {part["color"]} on set {part["setName"]} from {part["tracked"]} to {newCount} due to part being full"
         log_task(logTask,logDescription)
+        time.sleep(3)
         return
     
     # Update Disassembly Tracker
@@ -483,7 +531,8 @@ def display_other_sets(partNum: str, color:str):
     """
     # Grab all Sets the part is in
     setsFull = grab_sets(partNum, color)
-    sets = setsFull[setsFull["completed"] == 0]
+    sets = setsFull
+    # sets = setsFull[setsFull["completed"] == 0]
     
     if not sets.empty:
         # Create Lookup dictionary for Set ID to Set Name
@@ -528,7 +577,7 @@ def reset_prediction():
     st.session_state.lastSnapshot = st.session_state.snapshot
     
     # Reset update state
-    reset_session_state(["updatePart", "pred_success", "pred_score_overall", "pred_score_part", "pred_score_color", "pred_part_bl", "pred_color_bl", "pred_part", "pred_color","brick_result", "snapshot","predAddMulti","sent_brick","setNotAvailable"])
+    reset_session_state(["updatePart", "pred_success", "pred_score_overall", "pred_score_part", "pred_score_color", "pred_part_bl", "pred_color_bl", "pred_part", "pred_color","brick_result", "snapshot","sent_brick","setNotAvailable"])
     st.rerun()
 ## Camera Functions
 
