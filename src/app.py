@@ -158,19 +158,25 @@ if st.session_state.setLoaded:
                 
             # If Snapshot taken or available
             if st.session_state.snapshot is not None:
+                # Call brickcognize to identify part
+                if st.session_state.callBrickcognize:
+                    bm.call_brickognize()
+                if not st.session_state.callBrickcognize:
+                    if st.button("Start Brickgonize"):
+                        st.session_state.callBrickcognize = True
+                        st.rerun()
+                else:
+                    if st.button("Stop Brickgonize"):
+                        st.session_state.callBrickcognize = False
+                        st.rerun()
                 # Display Snapshot
                 if st.session_state.snapshot != st.session_state.sent_brick:
                     st.image(st.session_state.snapshot, caption="Captured Image", width=750 )
-                col6, col7 = st.columns(2)
-                with col6:
-                    if st.button("Send to Brickgonize"):
-                        bm.call_brickognize()
-                        st.rerun()
-                with col7:
-                    if st.button("Clear Image"):
-                        st.session_state.lastSnapshot = st.session_state.snapshot
-                        st.session_state.snapshot = None
-                        st.rerun()
+                # with col7:
+                if st.button("Clear Image"):
+                    st.session_state.lastSnapshot = st.session_state.snapshot
+                    st.session_state.snapshot = None
+                    st.rerun()
             # If called Brickognize Prediction
             if st.session_state.pred_success:
                 col8, col9 = st.columns(2)
@@ -185,9 +191,27 @@ if st.session_state.setLoaded:
                 bm.display_pred()
 
                 if st.session_state.updatePart is not None:
-                    col10, col11, col12 = st.columns(3)
+
+                    # Give Update options
+                    bm.display_prediction_add_multiparts()
+
+                     # Ask for input into what part should be updated to
+                    updateNum = st.number_input("Update Count:",min_value=int(0),max_value=int(st.session_state.updatePart["setTotal"]),step=int(1),value=int(st.session_state.updatePart["tracked"]))
+
+                    # If Update trigged
+                    if st.button("Update", type='primary'):
+                        # Update part with new number
+                        bm.update_disassemblyTracker(updateNumber = updateNum)
+            
+                        # Reload Disassembly_Tracker
+                        bm.load_tracker(st.session_state.lastSelectedSet)
+                        
+                        # Reset update state
+                        bm.reset_prediction()
+                    
+                    col10, col11 = st.columns(2)
                     with col10:
-                        if st.button("Add to Tracker"):
+                        if st.button("Add 1 to Current Count", type='primary'):
                             bm.update_disassemblyTracker(increment = True)
     
                             # Reload Disassembly_Tracker
@@ -196,28 +220,9 @@ if st.session_state.setLoaded:
                             # Reset update state
                             bm.reset_prediction()
                     with col11:
-                        if st.button("Add Multiple Parts to Tracker"):
-                            st.session_state.predAddMulti = True
-                    with col12:
                         if st.button("Clear Prediction and Sent Image"):
                             bm.reset_prediction()
-                    if st.session_state.predAddMulti:
-                        bm.display_prediction_add_multiparts()
-
-                        # Ask for input into what part should be updated to
-                        updateNum = st.number_input("Update Count:",min_value=int(0),max_value=int(st.session_state.updatePart["setTotal"]),step=int(1),value=int(st.session_state.updatePart["tracked"]))
-
-                        # If Update trigged
-                        if st.button("Update", type='primary'):
-                            # Update part with new number
-                            bm.update_disassemblyTracker(updateNumber = updateNum)
-                
-                            # Reload Disassembly_Tracker
-                            bm.load_tracker(st.session_state.lastSelectedSet)
-                            
-                            # Reset update state
-                            bm.reset_prediction()
-                        
+                    
                 else:
                     if st.button("Clear Prediction and Image"):
                         bm.reset_prediction()
