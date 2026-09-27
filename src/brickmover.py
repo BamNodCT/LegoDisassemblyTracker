@@ -424,25 +424,60 @@ def grab_sets(partNum: str, color:str):
         return pd.dataframe(columns=['Set ID','Part ID','Current','Total'])
 ## Display Functions
 
+##### Helper Function
+def group_stats(group):
+        return pd.Series({
+            "numParts": group["partID"].nunique(),
+            "completedParts": group.loc[group["completed"] == 1, "partID"].nunique(),
+            "numTotalParts": int(group["setTotal"].sum()),
+            "completedTotalParts": int(group["tracked"].sum()),
+        })
+
 def display_disassembly_tracker():
     """Display Disassemble Tracker Table
     """
     # Display Stats for Set
-    numParts = st.session_state.disassemblyTracker["partID"].nunique()
-    completedParts = st.session_state.disassemblyTracker["partID"][st.session_state.disassemblyTracker["completed"] == 1].nunique()
-    completed = completedParts / numParts
+ 
+    # Apply stats to data
+    stats = st.session_state.disassemblyTracker.groupby("spare").apply(group_stats)
+    
+    # Caclulate percentages
+    stats["completed"] = stats["completedParts"] / stats["numParts"]
+    stats["completedTotal"] = stats["completedTotalParts"] / stats["numTotalParts"]
 
-    numTotalParts = int(st.session_state.disassemblyTracker["setTotal"].sum())
-    completedTotalParts = int(st.session_state.disassemblyTracker["tracked"].sum())
-    completedTotal = completedTotalParts / numTotalParts
+    # Give Non Spare Stats
+    st.markdown(":blue-background[Core Parts:]")
+    
+    # Non Spare Parts Tracker
     pa = st.progress(0)
     with pa: 
-        st.progress(completed)
-    st.markdown(f"{completedParts} / {numParts} ({completed:.0%}) unique parts completed")
+        st.progress(stats.loc[0]["completed"])
+    st.markdown(f"{stats.loc[0]["completedParts"]:.0f} / {stats.loc[0]["numParts"]:.0f} ({stats.loc[0]["completed"]:.0%}) unique parts completed")
+
+    # Non Spare Total Parts Tracker
     pb = st.progress(0)
     with pb:
-        st.progress(completedTotal)
-    st.markdown(f"{completedTotalParts} / {numTotalParts} ({completedTotal:.0%}) parts collected")
+        st.progress(stats.loc[0]["completedTotal"])
+    st.markdown(f"{stats.loc[0]["completedTotalParts"]:.0f} / {stats.loc[0]["numTotalParts"]:.0f} ({stats.loc[0]["completedTotal"]:.0%}) parts collected")
+
+    # Check if Spare Parts Exist
+    if not stats.loc[1].empty:
+        
+        # Give stats for spare parts
+        st.markdown(":violet-background[Spare Parts:]")
+    
+        # Spare Parts Tracker
+        pc = st.progress(0)
+        with pc: 
+            st.progress(stats.iloc[1]["completed"])
+        st.markdown(f"{stats.iloc[1]["completedParts"]:.0f} / {stats.iloc[1]["numParts"]:.0f} ({stats.iloc[1]["completed"]:.0%}) unique parts completed")
+    
+        # Spare Total Parts Tracker
+        pd = st.progress(0)
+        with pd:
+            st.progress(stats.iloc[1]["completedTotal"])
+        st.markdown(f"{stats.iloc[1]["completedTotalParts"]:.0f} / {stats.iloc[1]["numTotalParts"]:.0f} ({stats.iloc[1]["completedTotal"]:.0%}) parts collected")
+    
     
     # Simpler database for display
     disp_disTrack = st.session_state.disassemblyTracker[["completed","partID","imageID","partName","spare","setTotal","tracked"]]
