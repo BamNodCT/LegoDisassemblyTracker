@@ -19,7 +19,7 @@ services:
       init-folders:
         condition: service_completed_successfully
     volumes:
-      - ${BRICKTRACKER_FOLDER}:/app/data:rw  # v1.3+ consolidates everything into /app/data
+      - ${BRICKTRACKER_FOLDER}:/app/data:rw 
     restart: unless-stopped
                
   legoscanner_dev:
@@ -28,7 +28,7 @@ services:
       dockerfile: dev.DockerFile
     container_name: legoscanner_dev
     volumes:
-      - ${LEGOSCANNER_FOLDER}:/workspaces/legoscanner/:rw # Mounts your code
+      - ${LEGOSCANNER_FOLDER}:/workspaces/legoscanner/:rw # Mounts code
       - ${BRICKTRACKER_FOLDER}:/workspaces/legoscanner/bricktracker/:rw
       # DEVELOPMENT
       - ${DEV_SSH_FOLDER}:/root/.ssh:rw
@@ -48,7 +48,12 @@ services:
     ports:
       - "3004:3000"
     volumes:
-      # Mount your database folder so DbGate can read it
+      # Mount database folder so DbGate can read it
       - ${BRICKTRACKER_FOLDER}/app.db:/root/datadir/sqlite_files/app.db:rw
     environment:
       - DEV_MODE=false
+      # Makes SQLite Connection to Database
+      - CONNECTIONS=bt
+      - LABEL_bt=BrickTrackerDB
+      - FILE_bt=/root/datadir/sqlite_files/app.db
+      - ENGINE_bt=sqlite@dbgate-plugin-sqlite

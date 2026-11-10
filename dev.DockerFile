@@ -22,4 +22,4 @@ RUN pip3 install --no-cache-dir -r requirements.dev.txt
 EXPOSE 8501 8888
 
 # Launch JupyterLab, bind to all network interfaces, and allow running as root in container
-ENTRYPOINT ["jupyter", "lab", "--ip=0.0.0.0", "--port=8888", "--no-browser", "--allow-root", "--ContentsManager.allow_hidden=True"]
+ENTRYPOINT ["jupyter", "lab", "--ip=0.0.0.0", "--port=8888", "--no-browser", "--allow-root", "--ContentsManager.allow_hidden=True", "--IdentityProvider.token=", "--ServerApp.password="]

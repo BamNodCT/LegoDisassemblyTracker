@@ -16,7 +16,7 @@ services:
     environment:
       - BK_REBRICKABLE_API_KEY=${BK_REBRICKABLE_API_KEY}
     volumes:
-      - ${BRICKTRACKER_FOLDER}:/app/data:rw  # v1.3+ consolidates everything into /app/data
+      - ${BRICKTRACKER_FOLDER}:/app/data:rw
     depends_on:
       init-folders:
         condition: service_completed_successfully
