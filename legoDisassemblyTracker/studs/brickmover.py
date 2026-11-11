@@ -3,8 +3,8 @@ SQL processes, IP Camera Calls, and Brickognize Calls
 """
 # Imports
 import streamlit as st
-import settings
-import databasemanager
+from studs import settings
+from studs import databasemanager
 from contextlib import closing
 import requests
 import sqlite3

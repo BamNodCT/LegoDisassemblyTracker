@@ -1,13 +1,13 @@
 ## To run Streamlit app
-# streamlit run ./src/app.py --server.port=8501
+# streamlit run ./legoDisassemblyTracker/Hello.py --server.port=8501
 
 ################ Imports #######################
 # Imports
 import streamlit as st
 import pandas as pd
-import brickmover as bm
-import databasemanager
-import settings
+from studs import brickmover as bm
+from studs import databasemanager
+from studs import settings
 
 import importlib
 
