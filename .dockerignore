@@ -1,12 +1,18 @@
-# Ignore all development files
-*.dev.yml
-*.dev.txt
-dev.DockerFile
-prod.DockerFile
-**/.ipynb_checkpoints/
-**/__pycache__/
-bricktracker/
-.env
+# Git and Config
 .git
+.github
+.env
+
+# Python Runtime
+**/__pycache__/
+**/.ipynb_checkpoints/
+*.pyc
+
+# Project
+bricktracker/
 README.md
-.github/
+
+# Docker files
+DockerFile
+docker-compose.dev.yml
+docker-compose.yml

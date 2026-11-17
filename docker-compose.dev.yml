@@ -25,7 +25,7 @@ services:
   legoscanner_dev:
     build: 
       context: ${LEGOSCANNER_FOLDER}
-      dockerfile: dev.DockerFile
+      target: dev
     container_name: legoscanner_dev
     volumes:
       - ${LEGOSCANNER_FOLDER}:/workspaces/legoscanner/:rw # Mounts code
