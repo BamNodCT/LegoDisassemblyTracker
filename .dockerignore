@@ -13,6 +13,6 @@ bricktracker/
 README.md
 
 # Docker files
-DockerFile
+Dockerfile
 docker-compose.dev.yml
 docker-compose.yml
