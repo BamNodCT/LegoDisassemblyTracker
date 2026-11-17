@@ -24,7 +24,7 @@ RUN echo 'export PS1="\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[0
     echo 'alias ll="ls -la --color=auto"' >> /root/.bashrc    
 
 # Install Dev requirements
-COPY ./legoDisassemblyTracker/requirements.dev.txt .
+COPY legoDisassemblyTracker/requirements.*.txt .
 RUN pip3 install --no-cache-dir -r requirements.dev.txt
 
 EXPOSE 8501 8888
@@ -36,7 +36,7 @@ ENTRYPOINT ["jupyter", "lab", "--ip=0.0.0.0", "--port=8888", "--no-browser", "--
 FROM base AS prod
 
 # Install ONLY production requirements
-COPY ./legoDisassemblyTracker/requirements.prod.txt .
+COPY legoDisassemblyTracker/requirements.prod.txt .
 RUN pip3 install --no-cache-dir -r requirements.prod.txt
 
 # Copy app to image
