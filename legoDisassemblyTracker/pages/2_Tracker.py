@@ -1,5 +1,5 @@
 ## To run Streamlit app
-# streamlit run ./legoDisassemblyTracker/Hello.py --server.port=8501
+# streamlit run ./legoDisassemblyTracker/app.py --server.port=8501
 
 ################ Imports #######################
 # Imports
@@ -12,7 +12,10 @@ from studs import settings
 import importlib
 
 # Set the layout to wide
-st.set_page_config(layout="wide")
+st.set_page_config(
+    layout="wide",
+    page_title="Tracker",
+    page_icon='🧱',)
 
 ################ Functions #######################
 
