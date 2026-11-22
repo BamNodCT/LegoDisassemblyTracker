@@ -5,16 +5,24 @@ DatabaseManager Class
 import sqlite3
 import pandas as pd
 from contextlib import closing
+from pathlib import Path
 
 class DatabaseManager:
     def __init__(self, db_path: str):
-        self.db_path = db_path
-
+        self.db_path = Path(db_path)
+    
     # Establish Connection
     def _get_connection(self):
         """Create SQLite3 Connection to db
         """
+        # Check if file exists and has content
+        if not self.db_path.is_file():
+            raise FileNotFoundError(f"Database file not found: {self.db_path}")
+        if self.db_path.stat().st_size == 0:
+            raise ValueError(f"Database file is empty (no data): {self.db_path}")
+        
         return closing(sqlite3.connect(self.db_path))
+        
 
     def query_df(self, query: str, params: dict | tuple | list | None = None) -> pd.DataFrame:
         """Executes a Select SQL query and returns pandas DataFrame.

@@ -5,7 +5,7 @@ import streamlit as st
 
 page = st.navigation(
     [
-        st.Page("pages/1_Welcome.py", title="Info", icon="📝"),
+        st.Page("pages/1_Welcome.py", title="Home", icon="👾"),
         st.Page("pages/2_Tracker.py", title="LEGO Disassembly Tracker", icon="🧱"),
     ]
 )
